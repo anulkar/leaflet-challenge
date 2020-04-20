@@ -1,14 +1,70 @@
+// Define all the base map layers: Streets, Dark, Outdoors and Satellite
+var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "mapbox.streets",
+    accessToken: API_KEY
+});
+
+    var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "mapbox.dark",
+    accessToken: API_KEY
+});
+
+    var outdoorsmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "mapbox.outdoors",
+    accessToken: API_KEY
+});
+
+    var satellitemap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "mapbox.satellite",
+    accessToken: API_KEY
+});
+
+// Define a baseMaps object to hold our base layers
+var baseMaps = {
+    "Street Map": streetmap,
+    "Dark Map": darkmap,
+    "Outdoors Map": outdoorsmap,
+    "Satellite Map": satellitemap,
+};
+
+// Create our map, giving it the streetmap view by default; we will add overlays later
+var myMap = L.map("map", {
+    center: [
+    40.866667, 34.566667
+    ],
+    zoom: 2,
+    layers: [streetmap]
+});
+
+var layerControl = L.control.layers(baseMaps).addTo(myMap);
+layerControl.expand();
+
 // Query URL to retrieve GeoJSON summary data for all earthquakes from USGS for the past 7 days
 // Reference: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
 var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+var queryTetonicPlates = "static/data/PB2002_plates.json";
 
 // Perform a GET request to the query URL
 d3.json(queryURL, function(data) {
     // Once we get a response, send the data.features object to the createFeatures function
-    createFeatures(data.features)
+    createEarthquakeFeatures(data.features)
   });
 
-function createFeatures(earthquakeData) {
+addLegend();
+
+d3.json(queryTetonicPlates, function(data) {
+    createTetonicPlatesFeatures(data.features);
+});
+
+function createEarthquakeFeatures(earthquakeData) {
 
     // Define a function we want to run once for each feature in the features array
     // Give each feature a popup describing the place and time of the earthquake
@@ -42,9 +98,33 @@ function createFeatures(earthquakeData) {
       onEachFeature: onEachFeature,
       pointToLayer: createCircleMarker
     });
+
+    // Create a layer control
+    // Pass in our baseMaps and overlayMaps
+    // Add the layer control to the map
+    layerControl.addOverlay(earthquakes, "Earthquakes").addTo(myMap);
+    layerControl.expand();
+}
+
+function createTetonicPlatesFeatures(tetonicPlatesData) {
     
-    // Sending our earthquakes layer to the createMap function
-    createMap(earthquakes);
+    // Define a function we want to run once for each feature in the features array
+    // Give each feature a popup describing the tetonic plate name
+    function onEachFeature(feature, layer) {
+        layer.bindPopup("<h3>Plate Name: " + feature.properties.PlateName + "</h3>");
+    }
+
+    // Create a GeoJSON layer containing the features array on the tetonicPlatesData object
+    // Run the onEachFeature function once for each piece of data in the array
+    var tetonicPlates = L.geoJSON(tetonicPlatesData, {
+        onEachFeature: onEachFeature
+    });
+
+    // Create a layer control
+    // Pass in our baseMaps and overlayMaps
+    // Add the layer control to the map
+    layerControl.addOverlay(tetonicPlates,"Fault Lines").addTo(myMap);
+    layerControl.expand();
   }
 
 // Function to get color based on the magnitude of the earthquake 
@@ -66,58 +146,7 @@ function getColor(magnitude) {
     }
 }
 
-function createMap(earthquakes) {
-
-    // Define streetmap and darkmap layers
-    var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    maxZoom: 18,
-    id: "mapbox.streets",
-    accessToken: API_KEY
-    });
-
-    var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    maxZoom: 18,
-    id: "mapbox.dark",
-    accessToken: API_KEY
-    });
-
-    var outdoorsmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    maxZoom: 18,
-    id: "mapbox.outdoors",
-    accessToken: API_KEY
-    });
-
-    // Define a baseMaps object to hold our base layers
-    var baseMaps = {
-        "Street Map": streetmap,
-        "Dark Map": darkmap,
-        "Outdoors Map": outdoorsmap
-    };
-
-    // Create overlay object to hold our overlay layer
-    var overlayMaps = {
-        Earthquakes: earthquakes
-    };
-
-    // Create our map, giving it the streetmap and earthquakes layers to display on load
-    var myMap = L.map("map", {
-        center: [
-        40.866667, 34.566667
-        ],
-        zoom: 2,
-        layers: [streetmap, earthquakes]
-    });
-
-    // Create a layer control
-    // Pass in our baseMaps and overlayMaps
-    // Add the layer control to the map
-    L.control.layers(baseMaps, overlayMaps, {
-        collapsed: false
-    }).addTo(myMap);
-
+function addLegend() {
     // Custom Legend Control
     var legend = L.control({position: 'bottomright'});
 
