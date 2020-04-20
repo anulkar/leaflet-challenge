@@ -8,24 +8,35 @@ d3.json(queryURL, function(data) {
     createFeatures(data.features)
   });
 
-// Define array to hold Earthquake markers
-var earthquakeMarkers = [];
-
 function createFeatures(earthquakeData) {
 
     // Define a function we want to run once for each feature in the features array
     // Give each feature a popup describing the place and time of the earthquake
     function onEachFeature(feature, layer) {
-      layer.bindPopup("<h3>Magnitude: " + feature.properties.mag + "</h3>" + 
-        "<h3>" + feature.properties.place + "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+        layer.bindPopup("<h3>Magnitude: " + feature.properties.mag + "</h3>" + 
+            "<h3>" + feature.properties.place + "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
     }
-  
+    
+    // This will be run when L.geoJSON creates the point layer from the GeoJSON data.
+    function createCircleMarker(feature, latlng) {
+        // Change the values of these options to change the symbol's appearance
+        let markerOptions = {
+            stroke: false,
+            fillOpacity: 0.75,
+            color: "red",
+            fillColor: "red",
+            radius: feature.properties.mag * 2
+        }
+    return L.circleMarker(latlng, markerOptions);
+    }
+
     // Create a GeoJSON layer containing the features array on the earthquakeData object
     // Run the onEachFeature function once for each piece of data in the array
     var earthquakes = L.geoJSON(earthquakeData, {
-      onEachFeature: onEachFeature
+      onEachFeature: onEachFeature,
+      pointToLayer: createCircleMarker
     });
-  
+    
     // Sending our earthquakes layer to the createMap function
     createMap(earthquakes);
   }
@@ -73,4 +84,17 @@ function createMap(earthquakes) {
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
     }).addTo(myMap);
+
+    // Create a legend to display information about our map
+    var info = L.control({
+        position: "bottomright"
+    });
+
+    // When the layer control is added, insert a div with the class of "legend"
+    info.onAdd = function() {
+        var div = L.DomUtil.create("div", "legend");
+        return div;
+    };
+    // Add the info legend to the map
+    info.addTo(map);
 }
