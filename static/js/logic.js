@@ -52,8 +52,8 @@ layerControl.expand();
 // Reference: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
 var queryEarthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-// Query URL for the local GeoJSON file containing tetonic plates data
-var queryTetonicPlates = "static/data/PB2002_plates.json";
+// Query URL for the local GeoJSON file containing tectonic plates data
+var queryTectonicPlates = "static/data/PB2002_plates.json";
 
 // Perform a GET request to the query URL
 d3.json(queryEarthquakeData, function(data) {
@@ -64,9 +64,9 @@ d3.json(queryEarthquakeData, function(data) {
 // Call function to add a color coded Legend for earthquake data 
 addLegend();
 
-// Read the Tetonic Plates GeoJSON file
-d3.json(queryTetonicPlates, function(data) {
-    createTetonicPlatesFeatures(data.features);
+// Read the Tectonic Plates GeoJSON file
+d3.json(queryTectonicPlates, function(data) {
+    createTectonicPlatesFeatures(data.features);
 });
 
 // Function to loop through the features of the Earthquake dataset and plot the data on the map
@@ -111,24 +111,24 @@ function createEarthquakeFeatures(earthquakeData) {
     layerControl.expand();
 }
 
-// Function to loop through the features of the Tetonic Plates dataset and plot the data on the map
-function createTetonicPlatesFeatures(tetonicPlatesData) {
+// Function to loop through the features of the Tectonic Plates dataset and plot the data on the map
+function createTectonicPlatesFeatures(tectonicPlatesData) {
     
     // Define a function we want to run once for each feature in the features array
-    // Give each feature a popup describing the tetonic plate name
+    // Give each feature a popup describing the tectonic plate name
     function onEachFeature(feature, layer) {
         layer.bindPopup("<h3>Plate Name: " + feature.properties.PlateName + "</h3>");
     }
 
-    // Create a GeoJSON layer containing the features array on the tetonicPlatesData object
+    // Create a GeoJSON layer containing the features array on the tectonicPlatesData object
     // Run the onEachFeature function once for each piece of data in the array
-    var tetonicPlates = L.geoJSON(tetonicPlatesData, {
+    var tectonicPlates = L.geoJSON(tectonicPlatesData, {
         onEachFeature: onEachFeature
     });
 
     // Pass in the overlayMap to the layer control
     // Add the layer control to the map
-    layerControl.addOverlay(tetonicPlates,"Fault Lines").addTo(myMap);
+    layerControl.addOverlay(tectonicPlates,"Fault Lines").addTo(myMap);
     layerControl.expand();
   }
 
