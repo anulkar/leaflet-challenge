@@ -44,26 +44,32 @@ var myMap = L.map("map", {
     layers: [streetmap]
 });
 
+// Create a layer control and add base maps to the map
 var layerControl = L.control.layers(baseMaps).addTo(myMap);
 layerControl.expand();
 
 // Query URL to retrieve GeoJSON summary data for all earthquakes from USGS for the past 7 days
 // Reference: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
-var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+var queryEarthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+
+// Query URL for the local GeoJSON file containing tetonic plates data
 var queryTetonicPlates = "static/data/PB2002_plates.json";
 
 // Perform a GET request to the query URL
-d3.json(queryURL, function(data) {
+d3.json(queryEarthquakeData, function(data) {
     // Once we get a response, send the data.features object to the createFeatures function
     createEarthquakeFeatures(data.features)
   });
 
+// Call function to add a color coded Legend for earthquake data 
 addLegend();
 
+// Read the Tetonic Plates GeoJSON file
 d3.json(queryTetonicPlates, function(data) {
     createTetonicPlatesFeatures(data.features);
 });
 
+// Function to loop through the features of the Earthquake dataset and plot the data on the map
 function createEarthquakeFeatures(earthquakeData) {
 
     // Define a function we want to run once for each feature in the features array
@@ -99,13 +105,13 @@ function createEarthquakeFeatures(earthquakeData) {
       pointToLayer: createCircleMarker
     });
 
-    // Create a layer control
-    // Pass in our baseMaps and overlayMaps
+    // Pass in the overlayMap to the layer control
     // Add the layer control to the map
     layerControl.addOverlay(earthquakes, "Earthquakes").addTo(myMap);
     layerControl.expand();
 }
 
+// Function to loop through the features of the Tetonic Plates dataset and plot the data on the map
 function createTetonicPlatesFeatures(tetonicPlatesData) {
     
     // Define a function we want to run once for each feature in the features array
@@ -120,8 +126,7 @@ function createTetonicPlatesFeatures(tetonicPlatesData) {
         onEachFeature: onEachFeature
     });
 
-    // Create a layer control
-    // Pass in our baseMaps and overlayMaps
+    // Pass in the overlayMap to the layer control
     // Add the layer control to the map
     layerControl.addOverlay(tetonicPlates,"Fault Lines").addTo(myMap);
     layerControl.expand();
@@ -146,6 +151,7 @@ function getColor(magnitude) {
     }
 }
 
+// Function to add a color coded Legend for earthquake data 
 function addLegend() {
     // Custom Legend Control
     var legend = L.control({position: 'bottomright'});
