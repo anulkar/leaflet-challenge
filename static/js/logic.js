@@ -22,7 +22,8 @@ function createFeatures(earthquakeData) {
 
         var magnitude = feature.properties.mag;
 
-        // Change the values of these options to change the symbol's appearance
+        // Change the marker options based on the earthquake's magnitude
+        // Earthquakes with higher magnitudes appear larger in size and darker in color
         let markerOptions = {
             stroke: true,
             fillOpacity: 0.5,
@@ -34,6 +35,8 @@ function createFeatures(earthquakeData) {
     return L.circleMarker(latlng, markerOptions);
     }
 
+    // Function to get color based on the magnitude of the earthquake 
+    // Earthquakes with higher magnitudes appear darker in color
     function getColor(magnitude) {
         switch (true) {
             case (magnitude <= 1): 
@@ -53,6 +56,7 @@ function createFeatures(earthquakeData) {
 
     // Create a GeoJSON layer containing the features array on the earthquakeData object
     // Run the onEachFeature function once for each piece of data in the array
+    // Run the createCircleMarker function
     var earthquakes = L.geoJSON(earthquakeData, {
       onEachFeature: onEachFeature,
       pointToLayer: createCircleMarker
