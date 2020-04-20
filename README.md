@@ -4,7 +4,7 @@ The USGS is responsible for providing scientific data about natural hazards, the
 
 ## Datasets Used
 1. [USGS GeoJSON summary data](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson) for all earthquakes for the past 7 days.
-2. GeoJSON data on Tectonic Plates sourced from https://github.com/fraxen/tectonicplates.
+2. [GeoJSON data](https://github.com/anulkar/leaflet-challenge/blob/master/static/data/PB2002_plates.json) on Tectonic Plates sourced from https://github.com/fraxen/tectonicplates.
 
 ## Visualizations
 1. Created [a basic visualization map](https://github.com/anulkar/leaflet-challenge/blob/master/index.html) using HTML, CSS,    D3.js, Leaflet.js, and Mapbox API that plots all earthquakes from the dataset based on their longitude and latitude.
