@@ -12,5 +12,5 @@ The USGS is responsible for providing scientific data about natural hazards, the
    * Popups provide additional information about the earthquake when a marker is clicked.
    * Added a legend to the map that provides context for the map data.
 2. Plotted the tectonic plates data set to illustrate the relationship between tectonic plates and seismic activity.
-   * Add a number of base maps to choose from, as well as separated out the two different data sets into overlays that can be turned on and off independently.
-   * Added layer controls to our map.
+   * Added a number of base maps to choose from, as well as separated out the two different data sets into overlays that can be turned on and off independently.
+   * Added layer controls to the map.
