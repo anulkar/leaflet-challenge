@@ -1,5 +1,5 @@
 // Query URL
-var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson";
+var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 // Perform a GET request to the query URL
 d3.json(queryURL, function(data) {
@@ -19,15 +19,36 @@ function createFeatures(earthquakeData) {
     
     // This will be run when L.geoJSON creates the point layer from the GeoJSON data.
     function createCircleMarker(feature, latlng) {
+
+        var magnitude = feature.properties.mag;
+
         // Change the values of these options to change the symbol's appearance
         let markerOptions = {
-            stroke: false,
-            fillOpacity: 0.75,
-            color: "red",
-            fillColor: "red",
-            radius: feature.properties.mag * 2
+            stroke: true,
+            fillOpacity: 0.5,
+            color: "black",
+            fillColor: getColor(magnitude),
+            weight: 0.3,
+            radius: magnitude * 5
         }
     return L.circleMarker(latlng, markerOptions);
+    }
+
+    function getColor(magnitude) {
+        switch (true) {
+            case (magnitude <= 1): 
+                return '#00FF00';
+            case (magnitude <= 2):
+                return '#65FF00';
+            case (magnitude <= 3):
+                return '#CBFF00';
+            case (magnitude <= 4):
+                return '#FFCC00';
+            case (magnitude <= 5):
+                return '#FF6600';
+            default:
+                return '#FF0000';
+          }
     }
 
     // Create a GeoJSON layer containing the features array on the earthquakeData object
