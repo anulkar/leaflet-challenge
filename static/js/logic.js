@@ -1,10 +1,10 @@
-// Query URL
+// Query URL to retrieve GeoJSON summary data for all earthquakes from USGS for the past 7 days
+// Reference: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
 var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 // Perform a GET request to the query URL
 d3.json(queryURL, function(data) {
     // Once we get a response, send the data.features object to the createFeatures function
-    console.log(data);
     createFeatures(data.features)
   });
 
@@ -32,26 +32,7 @@ function createFeatures(earthquakeData) {
             weight: 0.3,
             radius: magnitude * 5
         }
-    return L.circleMarker(latlng, markerOptions);
-    }
-
-    // Function to get color based on the magnitude of the earthquake 
-    // Earthquakes with higher magnitudes appear darker in color
-    function getColor(magnitude) {
-        switch (true) {
-            case (magnitude <= 1): 
-                return '#00FF00';
-            case (magnitude <= 2):
-                return '#65FF00';
-            case (magnitude <= 3):
-                return '#CBFF00';
-            case (magnitude <= 4):
-                return '#FFCC00';
-            case (magnitude <= 5):
-                return '#FF6600';
-            default:
-                return '#FF0000';
-          }
+        return L.circleMarker(latlng, markerOptions);
     }
 
     // Create a GeoJSON layer containing the features array on the earthquakeData object
@@ -65,6 +46,25 @@ function createFeatures(earthquakeData) {
     // Sending our earthquakes layer to the createMap function
     createMap(earthquakes);
   }
+
+// Function to get color based on the magnitude of the earthquake 
+// Earthquakes with higher magnitudes appear darker in color
+function getColor(magnitude) {
+    switch (true) {
+        case (magnitude <= 1): 
+            return '#00FF00';
+        case (magnitude <= 2):
+            return '#65FF00';
+        case (magnitude <= 3):
+            return '#CBFF00';
+        case (magnitude <= 4):
+            return '#FFCC00';
+        case (magnitude <= 5):
+            return '#FF6600';
+        default:
+            return '#FF0000';
+    }
+}
 
 function createMap(earthquakes) {
 
@@ -83,10 +83,18 @@ function createMap(earthquakes) {
     accessToken: API_KEY
     });
 
+    var outdoorsmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "mapbox.outdoors",
+    accessToken: API_KEY
+    });
+
     // Define a baseMaps object to hold our base layers
     var baseMaps = {
         "Street Map": streetmap,
-        "Dark Map": darkmap
+        "Dark Map": darkmap,
+        "Outdoors Map": outdoorsmap
     };
 
     // Create overlay object to hold our overlay layer
@@ -110,16 +118,29 @@ function createMap(earthquakes) {
         collapsed: false
     }).addTo(myMap);
 
-    // Create a legend to display information about our map
-    var info = L.control({
-        position: "bottomright"
-    });
+    // Custom Legend Control
+    var legend = L.control({position: 'bottomright'});
 
-    // When the layer control is added, insert a div with the class of "legend"
-    info.onAdd = function() {
-        var div = L.DomUtil.create("div", "legend");
+    legend.onAdd = function (myMap) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 1, 2, 3, 4, 5],
+            labels = [],
+			from, to;
+
+        // Loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(
+				'<i style="background:' + getColor(from + 1) + '"></i> ' +
+                from + (to ? '&ndash;' + to : '+'));
+		}
+
+		div.innerHTML = labels.join('<br>');
         return div;
     };
-    // Add the info legend to the map
-    info.addTo(map);
+
+    legend.addTo(myMap);
 }
